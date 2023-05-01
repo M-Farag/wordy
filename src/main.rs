@@ -1,8 +1,6 @@
-use wordy::Args;
+use wordy::Wordy;
 
 fn main() {
-    println!("Hello, world!");
-    let args = Args::get();
-
-    println!("args: {:?}", args);
+    let wordy = Wordy::new().unwrap();
+    wordy.process().unwrap();
 }
