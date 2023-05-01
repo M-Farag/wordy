@@ -13,7 +13,14 @@ pub struct Args {
 
     #[arg(short='o', long)]
     origin:String,
-    
+
     #[arg(short='r', long)]
     replacement:String
+}
+
+
+impl Args {
+    pub fn get() -> Self {
+        Self::parse()
+    }
 }
