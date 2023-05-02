@@ -20,7 +20,10 @@ pub struct Args {
     origin:String,
 
     #[arg(short='r', long)]
-    replacement:String
+    replacement:String,
+    
+    #[arg(short='s', long)]
+    safe: bool
 }
 
 
@@ -34,7 +37,8 @@ impl Args {
 pub struct Wordy {
     pub file_path: String,
     pub origin: String,
-    pub replacement: String
+    pub replacement: String,
+    pub safe: bool
 }
 
 impl Wordy {
@@ -43,28 +47,33 @@ impl Wordy {
         Ok(Self {
             file_path: args.file_path,
             origin: args.origin,
-            replacement: args.replacement
+            replacement: args.replacement,
+            safe: args.safe
         })
     }
 
     pub fn process(&self) -> Result<(),Box<dyn Error>>
     {
-        let file_in = fs::File::open(&self.file_path).unwrap();
-        let file_buffer_reader = BufReader::new(file_in);
+        let file_in = File::open(&self.file_path).unwrap();
+        let file_buf_read = BufReader::new(file_in);
 
-        let file_out = fs::File::create("tmp.txt").unwrap();
-        let mut file_buffer_writer = BufWriter::new(file_out);
+        let file_out = File::create("tmp.txt").unwrap();
+        let mut file_buf_write = BufWriter::new(file_out);
 
         let pattern = Regex::new(&self.origin).unwrap();
-
-        for line in file_buffer_reader.lines() {
+        
+        for line in file_buf_read.lines()
+        {
             let line = line.unwrap();
-            let replaced = pattern.replace_all(&line,&self.replacement);
-            writeln!(file_buffer_writer,"{}",replaced).unwrap();
+            let replaced = pattern.replace_all(&line, &self.replacement);
+
+            writeln!(file_buf_write,"{}",replaced).unwrap();
         }
-        
-        fs::rename("tmp.txt",&self.file_path).unwrap();
-        
+
+        if ! self.safe {
+            fs::rename("tmp.txt", &self.file_path).unwrap();
+        }
+
         Ok(())
     }
 }
